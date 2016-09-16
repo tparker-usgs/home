@@ -1,0 +1,136 @@
+##
+#  $Id: .tcshrc,v 1.19 2002/07/12 17:03:17 tomp Exp $
+#
+#  Yep, I like it this way.
+##
+
+#set echo
+umask 022
+
+# Ignore the rest if not a login shell
+if (${?TERM}) then
+
+  if ($TERM == "screen") then
+    setenv TERM xterm
+  endif
+
+setenv MAVEN_OPTS	"-Dhttps.protocols=TLSv1.2 \
+			-Djavax.net.ssl.trustStore=/home/tparker/certs/trust.jks \
+                     	-Djavax.net.ssl.trustStorePassword=123456   "
+                     	#-Djavax.net.ssl.keyStore=/home/tparker/certs/DOIRootCA2.cer \
+                     	#-Djavax.net.ssl.keyStoreType=pkcs12"
+setenv EDITOR           vim
+setenv CC		gcc
+setenv PAGER            less
+setenv LESS		'-M -Q -P ?B%pb\%. %f [ file %i/%m line\: %lb?B/%L. ?Bsize\: %Bb. ?xnext\: %x.%t ]$'
+setenv VISUAL           vim
+setenv HISTORY		500
+setenv OPENWINHOME      /usr/openwin
+setenv LC_ALL		C
+
+#
+set matchbeep=none
+set autolist
+unset autologout
+set rmstar
+set filec
+set noclobber
+set nonomatch
+set history=500
+set savehist
+set nobeep
+set path=(/usr/local/*/bin /usr/openwin/bin /usr/local/bin /usr/sbin /sbin /usr/bin /usr/ccs/bin /usr/ucb /bin /opt/*/bin /opt/*/*/bin /usr/local/texlive/2014/bin/i386-linux ~/bin)
+set pchar="% "
+set hostname = `hostname`
+
+if ( `whoami` == "root" ) then
+        set pchar="# "
+endif
+set HOST="`hostname | cut -d. -f1`"
+
+#
+# Setup aliases
+#
+
+if (xterm =~ $TERM) then
+	alias settitle 'echo -n "]2;${HOST}"'
+	settitle
+	alias cd 'cd \!*;settitle'
+endif
+alias installusgs 'mvn install:install-file -DgroupId=gov.usgs.volcanoes -DartifactId=usgs -Dpackaging=jar -Dversion=1.1 -Dfile=lib/usgs.jar'
+alias buildusgs 'cd ; rm -rf workspace-build ; cp -r workspace workspace-build ; cd workspace-build/USGS ; ant build'
+alias buildpensive 'buildusgs ; cd ~/workspace-build ; cp -r ~/git/pensive Pensive ;  cd Pensive ; ant jar'
+alias buildaqmsupdatemetadata 'buildusgs ; cd ~/workspace-build ; cp -r ~/git/AqmsUpdateMetadata . ; cd AqmsUpdateMetadata ; ant jar'
+
+alias ls        'ls -F'
+alias pin	'punch IN `date +%Y%U`'
+alias pout	'punch OUT'
+alias mv        'mv -i'
+alias cp        'cp -i'
+alias ftp	'ftp -i'
+alias dc	'dc ~/.dcrc'
+alias fd	'date +"_%Y%m%d"'
+alias tin	'tin -r'
+if ( -x ~/bin/vim_backup) then
+  alias vi	'~/bin/vim_backup'
+else
+  echo "vim_backup not found. You're on your own, be careful."
+  sleep 1
+endif
+
+  ###
+  # Linux is not UNIX
+  ###
+  if (`uname` == "Linux") then
+    # fix bs
+    bindkey "^[[3~" delete-char
+    # xterm-redhat is not xterm
+    if ($TERM == "xterm") then
+      setenv TERM xterm-r6
+    endif
+    # If I want my environment changed, I'll ask for it
+    alias su 'su -m'
+    # work arround Redhat's poorly complied less
+    alias less 'less --no-lessopen --no-init'
+    # color sucks
+    alias ls 'ls --color=none -F'
+  else
+    if ($TERM == "xterm-r6") then
+      setenv TERM xterm
+    endif
+  endif
+
+#
+# Setting the prompt
+set prompt = "%m [%t] % "
+if ( `whoami` == "root" ) then
+	set prompt = "%B%m%b [%t] # "
+endif
+
+
+if ($?prompt) then
+
+	# I'm going to try this again. 
+	# It'd be a lot easier if tcsh 
+	# supported all of vi keys.
+	bindkey -vi
+
+	# I'll never get tired of fortune
+        test -x /usr/local/bin/gfortune && /usr/local/bin/gfortune
+        echo ""
+
+	# load average
+	# show if >= 2.0
+        uptime | egrep '([1-9]+[0-9]|[2-9])\.'
+
+	# uptime
+	# show if < 1 day
+        uptime | grep -v day
+
+	# disk ussage
+	# show if >= 90%
+	# exclude some stuff
+	df -k | grep -v "(cdrom" | egrep '(10|9).%'
+endif
+
+endif
