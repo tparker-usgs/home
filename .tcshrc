@@ -23,7 +23,7 @@ setenv EDITOR           vim
 setenv CC		gcc
 setenv PAGER            less
 setenv LESS		'-M -Q -P ?B%pb\%. %f [ file %i/%m line\: %lb?B/%L. ?Bsize\: %Bb. ?xnext\: %x.%t ]$'
-setenv VISUAL           vim
+setenv VISUAL           vi
 setenv HISTORY		500
 setenv OPENWINHOME      /usr/openwin
 setenv LC_ALL		C
@@ -71,6 +71,7 @@ alias ftp	'ftp -i'
 alias dc	'dc ~/.dcrc'
 alias fd	'date +"_%Y%m%d"'
 alias tin	'tin -r'
+unalias grep
 if ( -x ~/bin/vim_backup) then
   alias vi	'~/bin/vim_backup'
 else
